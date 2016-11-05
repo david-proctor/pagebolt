@@ -10,17 +10,28 @@ func AssembleTemplates(scanner DirectoryScanner) []Template {
         panic("Failed to find any valid templates")
     }
 
+    cache := buildCache(templates)
+    templates = replacePlaceholdersWithCached(templates, cache)
+
+    return templates
+}
+
+func buildCache(templates []Template) map[string]Template {
     cache := make(map[string]Template)
     for _,template := range templates {
         if cachedTemplate,found := cache[template.Name()]; found {
-            if reflect.TypeOf(cachedTemplate) == reflect.TypeOf(TemplatePlaceholder{}) && reflect.TypeOf(template) != reflect.TypeOf(TemplatePlaceholder{}) {
+            if reflect.TypeOf(cachedTemplate) == reflect.TypeOf(TemplatePlaceholder{}) &&
+                reflect.TypeOf(template) != reflect.TypeOf(TemplatePlaceholder{}) {
                 cache[template.Name()] = template
             }
             continue
         }
         cache[template.Name()] = template
     }
+    return cache
+}
 
+func replacePlaceholdersWithCached(templates []Template, cache map[string]Template) []Template {
     for _,template := range templates {
         switch t := template.(type) {
         case Container:
@@ -35,6 +46,5 @@ func AssembleTemplates(scanner DirectoryScanner) []Template {
             continue
         }
     }
-
     return templates
 }
