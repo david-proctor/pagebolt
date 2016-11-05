@@ -1,16 +1,14 @@
 package templates
 
-import (
-    //"fmt"
-)
-
 type Template interface {
     Contents() []Template
     String() string
+    Name() string
 }
 
 type Container struct {
     contents []Template
+    name string
 }
 
 func (c Container) Contents() []Template {
@@ -18,15 +16,20 @@ func (c Container) Contents() []Template {
 }
 
 func (c Container) String() string {
-    var output string
+    output := ""
     for _,element := range c.contents {
         output += element.String()
     }
     return output
 }
 
+func (c Container) Name() string {
+    return c.name
+}
+
 type Literal struct {
     textContent string
+    name string
 }
 
 func (l Literal) Contents() []Template {
@@ -34,6 +37,10 @@ func (l Literal) Contents() []Template {
 }
 
 func (l Literal) String() string {
+    return l.textContent
+}
+
+func (l Literal) Name() string {
     return l.textContent
 }
 
@@ -47,4 +54,8 @@ func (p TemplatePlaceholder) Contents() []Template {
 
 func (p TemplatePlaceholder) String() string {
     return "PLACEHOLDER<" + p.name + ">"
+}
+
+func (p TemplatePlaceholder) Name() string {
+    return p.name
 }
