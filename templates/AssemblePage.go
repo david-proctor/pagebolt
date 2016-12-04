@@ -4,7 +4,7 @@ import (
     "strings"
 )
 
-func AssemblePage(name string, source string) Template {
+func AssemblePage(name *string, source string) Template {
     if len(source) == 0 {
         return makeEmptyTemplate()
     }
@@ -14,7 +14,7 @@ func AssemblePage(name string, source string) Template {
     if len(sections) == 1 {
         contents := make([]Template, 1)
         result := Container {
-            name: name,
+            name: *name,
             contents: contents,
         }
         insertLiteral(source, result, 0)
@@ -23,7 +23,7 @@ func AssemblePage(name string, source string) Template {
 
     contents := make([]Template, len(sections) * 2 - 1)
     template := Container {
-        name: name,
+        name: *name,
         contents: contents,
     }
 

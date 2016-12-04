@@ -16,7 +16,7 @@ func TestPagebolt(t *testing.T) {
 var _ = Describe("Main", func() {
 	Context("When running main", func(){
 		It("Does not throw", func() {
-            main := func() { WriteLogo() }
+            main := func() { PrintLogo() }
 			Expect(main).NotTo(Panic())
 		})
 	})
