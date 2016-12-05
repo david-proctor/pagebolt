@@ -4,17 +4,17 @@ import (
     "strings"
 )
 
-func AssemblePage(name *string, source *string) Template {
-    if len(*source) == 0 {
+func AssemblePage(name string, source string) Template {
+    if len(source) == 0 {
         return makeEmptyTemplate()
     }
 
-    sections := splitSource(*source)
+    sections := splitSource(source)
 
     if len(sections) == 1 {
         contents := make([]Template, 1)
         result := Container {
-            name: *name,
+            name: name,
             contents: contents,
         }
         insertLiteral(source, result, 0)
@@ -23,16 +23,16 @@ func AssemblePage(name *string, source *string) Template {
 
     contents := make([]Template, len(sections) * 2 - 1)
     template := Container {
-        name: *name,
+        name: name,
         contents: contents,
     }
 
     size := 0
     for index,element := range sections {
         if strings.HasPrefix(element, "<#") {
-            insertPlaceholder(&element, template, index)
+            insertPlaceholder(element, template, index)
         } else {
-            insertLiteral(&element, template, index)
+            insertLiteral(element, template, index)
         }
         size++
     }
@@ -67,17 +67,17 @@ func makeEmptyTemplate() Template {
     return template
 }
 
-func insertLiteral(content *string, container Container, index int) {
+func insertLiteral(content string, container Container, index int) {
     literal := Literal {
-        name: *content,
-        textContent: *content,
+        name: content,
+        textContent: content,
     }
     container.contents[index] = literal
 }
 
-func insertPlaceholder(name *string, container Container, index int) {
-    mungedName := *name
-    mungedName = mungedName[3 : len(*name) - 3]
+func insertPlaceholder(name string, container Container, index int) {
+    mungedName := name
+    mungedName = mungedName[3 : len(name) - 3]
     placeholder := TemplatePlaceholder {
         name: strings.TrimSpace(mungedName),
     }

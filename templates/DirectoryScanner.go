@@ -33,7 +33,7 @@ func (s *DirectoryScannerImpl) scanFile(path string, f os.FileInfo, err error) e
     filename := f.Name()
     filename = filename[:len(filename) - 4]
     contents := string(fileContents)
-    template := AssemblePage(&filename, &contents)
+    template := AssemblePage(filename, contents)
     s.templates = append(s.templates, template)
     return nil
 }
