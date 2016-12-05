@@ -19,7 +19,17 @@ func AssembleTemplates(scanner DirectoryScanner) []Template {
     }
 
     cache := buildCache(templates)
-    templates = replacePlaceholdersWithCached(templates, cache)
+
+    for _,t := range templates {
+        fmt.Println("======= !!! =======")
+        fmt.Println("Template name: ", t.Name())
+        fmt.Println("Template contents: ", t.ProcessedString(cache))
+    }
+
+    // At this point we have correct templates when we call ProcessedString.
+    // Still need a way to return them as templates.
+
+    templates = replacePlaceholdersWithCached(&templates, cache)
 
     return templates
 }
@@ -27,7 +37,6 @@ func AssembleTemplates(scanner DirectoryScanner) []Template {
 func buildCache(templates []Template) map[string]Template {
     cache := make(map[string]Template)
     for _,template := range templates {
-        fmt.Println("Last template: ", template.Name())
         if cachedTemplate,found := cache[template.Name()]; found {
             if reflect.TypeOf(cachedTemplate) == reflect.TypeOf(TemplatePlaceholder{}) &&
                 reflect.TypeOf(template) != reflect.TypeOf(TemplatePlaceholder{}) {
@@ -40,20 +49,14 @@ func buildCache(templates []Template) map[string]Template {
     return cache
 }
 
-func replacePlaceholdersWithCached(templates []Template, cache map[string]Template) []Template {
-    for _,template := range templates {
-        switch t := template.(type) {
-        case Container:
-            for i,content := range t.contents {
-                if reflect.TypeOf(content) == reflect.TypeOf(TemplatePlaceholder{}) {
-                    t.contents[i] = cache[content.Name()]
-                }
-            }
-        case TemplatePlaceholder:
-        case Literal:
-        default:
-            continue
+func replacePlaceholdersWithCached(rawTemplates *[]Template, cache map[string]Template) []Template {
+    output := make([]Template, 0)
+    for _,template := range *rawTemplates {
+        if IsPlaceholder(template) {
+            output = append(output, cache[template.Name()])
+        } else {
+            output = append(output, template)
         }
     }
-    return templates
+    return output
 }

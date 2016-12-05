@@ -18,7 +18,7 @@ func main() {
     scanner := templates.DirectoryScannerImpl{
         RootPath : args[0],
     }
-    fmt.Println("Building templates from path %s", scanner.RootPath)
+    fmt.Println("Building templates from path", scanner.RootPath)
     templates := templates.AssembleTemplates(scanner)
 
     for _,template := range templates {

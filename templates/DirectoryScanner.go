@@ -16,12 +16,12 @@ type DirectoryScannerImpl struct {
 }
 
 func (s DirectoryScannerImpl) Templates() []Template {
-    s.templates = make([]Template, 10)
+    s.templates = make([]Template, 0)
     filepath.Walk(s.RootPath, s.scanFile)
     return s.templates
 }
 
-func (s DirectoryScannerImpl) scanFile(path string, f os.FileInfo, err error) error {
+func (s *DirectoryScannerImpl) scanFile(path string, f os.FileInfo, err error) error {
     if f.IsDir() {
         return nil
     }
@@ -31,7 +31,9 @@ func (s DirectoryScannerImpl) scanFile(path string, f os.FileInfo, err error) er
         return err
     }
     filename := f.Name()
-    template := AssemblePage(&filename, string(fileContents))
+    filename = filename[:len(filename) - 4]
+    contents := string(fileContents)
+    template := AssemblePage(&filename, &contents)
     s.templates = append(s.templates, template)
     return nil
 }
