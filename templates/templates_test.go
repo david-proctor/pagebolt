@@ -49,6 +49,11 @@ var _ = Describe("AssemblePage", func() {
         It("panics on invalid template tokens", func() {
             Expect(func() { AssemblePage("Name", "Arglebargle <# template1 ># faffernaff") }).To(Panic())
         })
+        It("panics when it encounters a self-referencing template", func() {
+            selfReferencingSource := "self-referencing template [<# selfreference #>]"
+
+            Expect(func() { AssemblePage("selfreference", selfReferencingSource)}).To(Panic())
+        })
 	})
 
     Context("When calling AssembleTemplateCache()", func() {

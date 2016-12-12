@@ -34,7 +34,11 @@ func AssemblePage(name string, source string) Template {
     size := 0
     for index,element := range sections {
         if strings.HasPrefix(element, "<#") {
-            insertPlaceholder(element, template, index)
+            placeholderName := getNameFromPlaceholderTag(element)
+            if(placeholderName == name) {
+                panic("Cannot assemble page from self-referencing template: " + name)
+            }
+            insertPlaceholder(placeholderName, template, index)
         } else {
             insertLiteral(element, template, index)
         }
@@ -80,10 +84,13 @@ func insertLiteral(content string, container Container, index int) {
 }
 
 func insertPlaceholder(name string, container Container, index int) {
-    mungedName := name
-    mungedName = mungedName[3 : len(name) - 3]
     placeholder := TemplatePlaceholder {
-        name: strings.TrimSpace(mungedName),
+        name: name,
     }
     container.contents[index] = placeholder
+}
+
+func getNameFromPlaceholderTag(tag string) string {
+    name := tag[3 : len(tag) - 3]
+    return strings.TrimSpace(name)
 }
