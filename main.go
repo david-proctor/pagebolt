@@ -19,7 +19,7 @@ func main() {
         RootPath : args[0],
     }
     fmt.Println("Building templates from path", scanner.RootPath)
-    templates := templates.AssembleTemplates(scanner)
+    templates := templates.AssembleTemplateCache(scanner)
 
     for _,template := range templates {
         fmt.Println("=============================")

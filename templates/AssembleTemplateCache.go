@@ -2,17 +2,10 @@ package templates
 
 import (
     "reflect"
-    "fmt"
 )
 
-func AssembleTemplates(scanner DirectoryScanner) []Template {
+func AssembleTemplateCache(scanner DirectoryScanner) map[string]Template {
     templates := scanner.Templates()
-
-    for _,t := range templates {
-        fmt.Println("===============")
-        fmt.Println("Template name: ", t.Name())
-        fmt.Println("Template contents: ", t.String())
-    }
 
     if len(templates) == 0 {
         panic("Failed to find any valid templates")
@@ -20,18 +13,7 @@ func AssembleTemplates(scanner DirectoryScanner) []Template {
 
     cache := buildCache(templates)
 
-    for _,t := range templates {
-        fmt.Println("======= !!! =======")
-        fmt.Println("Template name: ", t.Name())
-        fmt.Println("Template contents: ", t.ProcessedString(cache))
-    }
-
-    // At this point we have correct templates when we call ProcessedString.
-    // Still need a way to return them as templates.
-
-    templates = replacePlaceholdersWithCached(&templates, cache)
-
-    return templates
+    return cache
 }
 
 func buildCache(templates []Template) map[string]Template {

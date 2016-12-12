@@ -13,11 +13,15 @@ func AssemblePage(name string, source string) Template {
 
     if len(sections) == 1 {
         contents := make([]Template, 1)
+        literal := Literal {
+            name: name,
+            textContent: source,
+        }
         result := Container {
             name: name,
             contents: contents,
         }
-        insertLiteral(source, result, 0)
+        contents[0] = literal
         return result
     }
 

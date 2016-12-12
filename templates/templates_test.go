@@ -2,7 +2,6 @@ package templates_test
 
 import (
 	. "github.com/pagebolt/templates"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"testing"
@@ -52,23 +51,34 @@ var _ = Describe("AssemblePage", func() {
         })
 	})
 
-    Context("When calling AssembleTemplates()", func() {
+    Context("When calling AssembleTemplateCache()", func() {
         literal1 := AssemblePage("literal1", "Literal 1")
+        templateWithLiteral1 := AssemblePage("Template", "TemplateWithLiteral1 [<# literal1 #>]")
+        directoryScanner := MockDirectoryScanner { }
 
         It("panics when directory scanner has no results", func() {
             directoryScanner := MockDirectoryScanner{}
 
-            Expect(func(){AssembleTemplates(directoryScanner)}).To(Panic())
+            Expect(func(){AssembleTemplateCache(directoryScanner)}).To(Panic())
         })
-        It("replaces placeholders with corresponding template", func() {
-
-            templateWithLiteral1 := AssemblePage("Template", "TemplateWithLiteral1 [<# literal1 #>]")
-            directoryScanner := MockDirectoryScanner { }
+        It("Collects correct templates in cache", func() {
             directoryScanner.Setup(literal1, templateWithLiteral1)
 
-            templates := AssembleTemplates(directoryScanner)
+            cache := AssembleTemplateCache(directoryScanner)
 
-            templateCollectionContainsLiteralContent(templates, "TemplateWithLiteral1 [Literal 1]")
+            literalCheck := func() bool { return cache["literal1"].String() == "Literal 1" }
+            Expect(literalCheck()).To(BeTrue())
+
+            Expect(cache["Template"].Contents()[1].Name()).To(Equal(cache["literal1"].Name()))
+        })
+        It("Correctly substitutes placeholder values when calling ProcessedString", func() {
+            directoryScanner.Setup(literal1, templateWithLiteral1)
+
+            cache := AssembleTemplateCache(directoryScanner)
+            expected := "TemplateWithLiteral1 [Literal 1]"
+            actual := cache["Template"].ProcessedString(cache)
+
+            Expect(actual).To(Equal(expected))
         })
     })
 })
@@ -86,13 +96,4 @@ func (s *MockDirectoryScanner) Setup (templates ...Template) {
 
 func (s MockDirectoryScanner) Templates () []Template {
     return s.templates
-}
-
-func templateCollectionContainsLiteralContent (collection []Template, expected string) {
-    for _,template := range(collection) {
-        if template.String() == expected {
-            return
-        }
-    }
-    Fail("Template collection does not contain expected literal content")
 }
