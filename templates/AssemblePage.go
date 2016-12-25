@@ -2,7 +2,6 @@ package templates
 
 import (
     "strings"
-    "fmt"
 )
 
 func AssemblePage(name string, source string) Template {
@@ -24,8 +23,6 @@ func AssemblePage(name string, source string) Template {
         name: name,
         contents: make([]Template, 0),
     }
-
-    fmt.Println("%%%", name)
 
     for index,element := range sections {
         if strings.HasPrefix(element, "<#") {
