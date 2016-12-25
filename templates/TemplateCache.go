@@ -8,6 +8,24 @@ type TemplateCache struct {
     cache map[string]Template
 }
 
+func (cache TemplateCache) Get (name string) Template {
+    return cache.cache[name]
+}
+
+func (cache TemplateCache) GetAll () []Template {
+    templates := make([]Template, 0)
+    for _,t := range cache.cache {
+        templates = append(templates, t)
+    }
+    return templates
+}
+
+func (cache TemplateCache) panicIfCircularReferenceDetected() {
+    for _,template := range cache.cache {
+        cache.panicIfTemplateRefersToParents(template, make([]string, 0))
+    }
+}
+
 func MakeCache (scanner DirectoryScanner) TemplateCache {
     rawTemplates := scanner.Templates()
 
@@ -32,16 +50,6 @@ func MakeCache (scanner DirectoryScanner) TemplateCache {
 
     cache.panicIfCircularReferenceDetected()
     return cache
-}
-
-func (cache TemplateCache) Get (name string) Template {
-    return cache.cache[name]
-}
-
-func (cache TemplateCache) panicIfCircularReferenceDetected() {
-    for _,template := range cache.cache {
-        cache.panicIfTemplateRefersToParents(template, make([]string, 0))
-    }
 }
 
 func (cache TemplateCache) panicIfTemplateRefersToParents (template Template, parentNames []string) {
