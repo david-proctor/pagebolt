@@ -3,7 +3,7 @@ package templates
 type Template interface {
     Contents() []Template
     String() string
-    ProcessedString(cache map[string]Template) string
+    ProcessedString(cache TemplateCache) string
     Name() string
 }
 
@@ -24,11 +24,11 @@ func (c Container) String() string {
     return output
 }
 
-func (c Container) ProcessedString(cache map[string]Template) string {
+func (c Container) ProcessedString(cache TemplateCache) string {
     output := ""
     for _,element := range c.contents {
         if IsPlaceholder(element) {
-            output += cache[element.Name()].ProcessedString(cache)
+            output += cache.Get(element.Name()).ProcessedString(cache)
         } else {
             output += element.String()
         }
@@ -38,6 +38,21 @@ func (c Container) ProcessedString(cache map[string]Template) string {
 
 func (c Container) Name() string {
     return c.name
+}
+
+func (c* Container) AppendLiteral(name string, text string) {
+    literal := Literal {
+        name: name,
+        textContent: text,
+    }
+    c.contents = append(c.contents, literal)
+}
+
+func (c* Container) AppendPlaceholder(name string) {
+    placeholder := TemplatePlaceholder {
+        name: name,
+    }
+    c.contents = append(c.contents, placeholder)
 }
 
 type Literal struct {
@@ -53,7 +68,7 @@ func (l Literal) String() string {
     return l.textContent
 }
 
-func (l Literal) ProcessedString(map[string]Template) string {
+func (l Literal) ProcessedString (TemplateCache) string {
     return l.String()
 }
 
@@ -73,7 +88,7 @@ func (p TemplatePlaceholder) String() string {
     return "PLACEHOLDER<" + p.name + ">"
 }
 
-func (p TemplatePlaceholder) ProcessedString(map[string]Template) string {
+func (p TemplatePlaceholder) ProcessedString (TemplateCache) string {
     panic("Cannot process string on a TemplatePlaceholder")
 }
 

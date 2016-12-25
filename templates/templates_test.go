@@ -64,26 +64,33 @@ var _ = Describe("AssemblePage", func() {
         It("panics when directory scanner has no results", func() {
             directoryScanner := MockDirectoryScanner{}
 
-            Expect(func(){AssembleTemplateCache(directoryScanner)}).To(Panic())
+            Expect(func(){MakeCache(directoryScanner)}).To(Panic())
         })
         It("Collects correct templates in cache", func() {
             directoryScanner.Setup(literal1, templateWithLiteral1)
 
-            cache := AssembleTemplateCache(directoryScanner)
+            cache := MakeCache(directoryScanner)
 
-            literalCheck := func() bool { return cache["literal1"].String() == "Literal 1" }
+            literalCheck := func() bool { return cache.Get("literal1").String() == "Literal 1" }
             Expect(literalCheck()).To(BeTrue())
 
-            Expect(cache["Template"].Contents()[1].Name()).To(Equal(cache["literal1"].Name()))
+            Expect(cache.Get("Template").Contents()[1].Name()).To(Equal(cache.Get("literal1").Name()))
         })
         It("Correctly substitutes placeholder values when calling ProcessedString", func() {
             directoryScanner.Setup(literal1, templateWithLiteral1)
 
-            cache := AssembleTemplateCache(directoryScanner)
+            cache := MakeCache(directoryScanner)
             expected := "TemplateWithLiteral1 [Literal 1]"
-            actual := cache["Template"].ProcessedString(cache)
+            actual := cache.Get("Template").ProcessedString(cache)
 
             Expect(actual).To(Equal(expected))
+        })
+        It("panics when it encounters a multi-level circular template reference", func() {
+            topTemplate := AssemblePage("toptemplate", "top level source [<# bottomtemplate #>]")
+            bottomTemplate := AssemblePage("bottomtemplate", "bottom level source [<# toptemplate #>]")
+            directoryScanner.Setup(topTemplate, bottomTemplate)
+
+            Expect(func() { MakeCache(directoryScanner) }).To(Panic())
         })
     })
 })

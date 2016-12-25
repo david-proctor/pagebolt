@@ -2,6 +2,7 @@ package templates
 
 import (
     "strings"
+    "fmt"
 )
 
 func AssemblePage(name string, source string) Template {
@@ -12,39 +13,31 @@ func AssemblePage(name string, source string) Template {
     sections := splitSource(source)
 
     if len(sections) == 1 {
-        contents := make([]Template, 1)
-        literal := Literal {
-            name: name,
-            textContent: source,
-        }
         result := Container {
             name: name,
-            contents: contents,
+            contents: make([]Template, 0),
         }
-        contents[0] = literal
-        return result
+        result.AppendLiteral(name, source)
     }
 
-    contents := make([]Template, len(sections) * 2 - 1)
     template := Container {
         name: name,
-        contents: contents,
+        contents: make([]Template, 0),
     }
 
-    size := 0
+    fmt.Println("%%%", name)
+
     for index,element := range sections {
         if strings.HasPrefix(element, "<#") {
             placeholderName := getNameFromPlaceholderTag(element)
             if(placeholderName == name) {
                 panic("Cannot assemble page from self-referencing template: " + name)
             }
-            insertPlaceholder(placeholderName, template, index)
+            template.AppendPlaceholder(placeholderName)
         } else {
-            insertLiteral(element, template, index)
+            template.AppendLiteral(name + string(index), element)
         }
-        size++
     }
-    template.contents = template.contents[0:size]
 
     return template
 }
@@ -73,21 +66,6 @@ func makeEmptyTemplate() Template {
         contents: contents,
     }
     return template
-}
-
-func insertLiteral(content string, container Container, index int) {
-    literal := Literal {
-        name: content,
-        textContent: content,
-    }
-    container.contents[index] = literal
-}
-
-func insertPlaceholder(name string, container Container, index int) {
-    placeholder := TemplatePlaceholder {
-        name: name,
-    }
-    container.contents[index] = placeholder
 }
 
 func getNameFromPlaceholderTag(tag string) string {

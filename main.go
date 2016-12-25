@@ -19,12 +19,13 @@ func main() {
         RootPath : args[0],
     }
     fmt.Println("Building templates from path", scanner.RootPath)
-    templates := templates.AssembleTemplateCache(scanner)
+    //cache := templates.MakeCache(scanner)
 
-    for _,template := range templates {
-        fmt.Println("=============================")
-        fmt.Println(template.String())
-    }
+    // TODO expose function to iterate through templates
+    //for _,template := range cache {
+    //    fmt.Println("=============================")
+    //    fmt.Println(template.String())
+    //}
 }
 
 func PrintLogo() {
